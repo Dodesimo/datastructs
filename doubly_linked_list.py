@@ -54,24 +54,28 @@ class DoublyLinkedList:
         if index == self.size:
             return self.add_to_back(data)
         
-        temp = self.head
-        prev = None
-        position = 0
-        while position < index:
-            prev = temp
-            temp = temp.next
-            position += 1
+        temp = None
+        if index < self.size // 2:
+            temp = self.head
+            counter = 0
+            while counter < index:
+                temp = temp.next
+                counter += 1
+        else:
+            temp = self.tail 
+            counter = self.size - 1
+            while counter > index:
+                temp = temp.prev
+                counter -= 1
         
-        # prev is one before where want to insert, temp is where we want to insert
         newNode = Node(data = data)
-        
+        prev = temp.prev
         prev.next = newNode
         newNode.prev = prev
-
-        temp.prev = newNode
         newNode.next = temp
-
+        temp.prev = newNode
         self.size += 1
+        return 
 
     def add_to_front(self, data):
         """
@@ -141,10 +145,10 @@ class DoublyLinkedList:
             raise IndexError("invalid index")
 
         if index == 0:
-            return remove_from_front()
+            return self.remove_from_front()
         
-        if index == self.size:
-            return remove_from_back()
+        if index == self.size - 1:
+            return self.remove_from_back()
 
         prev = None
         curr = self.head
@@ -252,6 +256,11 @@ class DoublyLinkedList:
             raise LookupError("not found")
         
         # prev is one before curr, curr is the present, nxt is the value after
+        if curr == self.head:
+            return remove_from_front()
+        if curr == self.tail:
+            return remove_from_back()
+
         prev = curr.prev
         prev.next = nxt
         nxt.prev = prev
@@ -728,7 +737,7 @@ def main():
     print()
     print("============================")
     print("ALL TESTS PASSED")
-    print("============================")
+    print("============================") 
 
 if __name__ == "__main__":
     main()
