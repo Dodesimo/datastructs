@@ -53,22 +53,27 @@ class LinearProbingHashMap:
         """
         if key is None or value is None:
             raise ValueError("invalid data")
-        
-        if (self.size + 1) / len(self.backing_array) > self.MAX_LOAD_FACTOR:
-            self._resize(2 * len(self.backing_array))
 
         position = hash(key) % len(self.backing_array)
+        firstTombstone = None
         while True:
-            if self.backing_array[position] is None or self.backing_array[position].is_deleted:
+            if self.backing_array[position] is None:
                 break
+            if self.backing_array[position].is_deleted and firstTombstone is None:
+                firstTombstone = position
             elif self.backing_array[position].key == key:
                 self.backing_array[position].value = value
                 return
             position = (position + 1) % len(self.backing_array)
         
         node = Entry(key, value)
-        self.backing_array[position] = node
+        if firstTombstone is None:
+            self.backing_array[position] = node
+        else:
+            self.backing_array[firstTombstone] = node
         self.size += 1
+        if self.size / len(self.backing_array) > self.MAX_LOAD_FACTOR:
+            self._resize(2 * len(self.backing_array)) 
         return
 
     def get(self, key):
@@ -94,7 +99,7 @@ class LinearProbingHashMap:
         while True:
             if self.backing_array[position] is None:
                 raise KeyError("key doesn't exist")
-            elif self.backing_array[position].key == key:
+            elif self.backing_array[position].key == key and not self.backing_array[position].is_deleted:
                 return self.backing_array[position].value
             position = (position + 1) % len(self.backing_array)
         raise KeyError("key doesn't exist")
@@ -126,7 +131,7 @@ class LinearProbingHashMap:
         while True:
             if self.backing_array[position] is None:
                 raise KeyError("invalid key")
-            if self.backing_array[position].key == key:
+            if self.backing_array[position].key == key and self.backing_array[position].is_deleted == False:
                 self.backing_array[position].is_deleted = True
                 self.size -= 1
                 return self.backing_array[position].value
