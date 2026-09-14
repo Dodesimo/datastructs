@@ -517,7 +517,7 @@ class AVLTree:
         result = True
         def dfs(root):
             nonlocal result
-            if not root:
+            if not root:    
                 return 0
             leftHeight = dfs(root.left)
             rightHeight = dfs(root.right)
